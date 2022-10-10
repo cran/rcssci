@@ -1,0 +1,31 @@
+Package: rcssci
+Type: Package
+Title: Visualization of Restricted Cubic Splines
+Version: 0.1.0
+Authors@R: c(
+       person("Zhiqiang", "Nie",     email = "niezhiqiang@gdph.org.cn", role = c("aut", "cre", "cph"),
+            comment = c("ORCID = 0000-0001-7642-3286")),
+       person("JunZhang",        email = "3219030654@stu.cpu.edu.cn", role = "ctb"), 
+       person("Leichao", "Chen",  email = "15626049801@163.com", role = "ctb")
+       )
+Maintainer: Zhiqiang Nie <niezhiqiang@gdph.org.cn>
+Description: Restricted Cubic Splines were performed to explore the shape of association form of "U, inverted U,
+    L" shape and test linearity or non-linearity base on "Cox,Logistic,linear" regression, and auto output Restricted Cubic Splines figures.
+    The Restricted Cubic Splines method were based on 
+    Suli Huang (2022) <doi:10.1016/j.ecoenv.2022.113183>,Amit Kaura (2019) <doi:10.1136/bmj.l6055>,
+    and Harrell Jr (2015, ISBN:978-3-319-19424-0 (Print) 978-3-319-19425-7 (Online)).
+Depends: R (>= 4.2.0)
+LazyData: true
+Imports: pacman, rms, ggplot2, survminer, segmented, survival, dplyr,
+        patchwork, Cairo
+Encoding: UTF-8
+License: Artistic-2.0
+BugReports: https://github.com/popnie/RCSsci/issues
+RoxygenNote: 7.2.1
+NeedsCompilation: no
+Packaged: 2022-10-08 05:01:01 UTC; Administrator
+Author: Zhiqiang Nie [aut, cre, cph] (ORCID = 0000-0001-7642-3286),
+  JunZhang [ctb],
+  Leichao Chen [ctb]
+Repository: CRAN
+Date/Publication: 2022-10-10 08:20:02 UTC
