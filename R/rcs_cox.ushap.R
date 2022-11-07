@@ -4,6 +4,7 @@
 #'@details Cox models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
+#'@param knot knot=3-7 or automatic calculate by AIC min
 #'@param y outcome=0,1
 #'@param time censor time
 #'@param covs covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command
@@ -22,9 +23,9 @@
 #'@examples library(rcssci)
 #' rcs_cox.ushap(data=sbpdata, y = "status",x = "sbp",time = "time",
 #' prob=0.1,filepath=tempdir())
-#'# library(rcssci
-#'# rcs_cox.ushap(data=sbpdata, y = "status",x = "sbp",covs=c("age"),
-#'# time = "time", prob=0.1,filepath=tempdir())
+#'# library(rcssci)
+#'# rcs_cox.ushap(knot=4,data=sbpdata, y = "status",x = "sbp",covs=c("age"),
+#'# time = "time", prob=0.1,filepath="D:/temp")
 #'
 #' @export
 #' @name rcs_cox.ushap
@@ -35,9 +36,10 @@ globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'elem
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis', 'survival',
                   'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd','Surv'))
 
-rcs_cox.ushap<-function(data,y,x,time,covs,prob,filepath,...)
+rcs_cox.ushap<-function(data,knot,y,x,time,covs,prob,filepath,...)
 {
   pacman::p_load(rms,ggplot2,survminer,survival,dplyr,patchwork,Cairo)
+  if (!missing(knot)) {warning("please be sure of knot by AIC min(default) or preliminary investigation suggested")}
   if (missing(data)) {stop("data required.")}
   if (missing(x)) {stop("x required.")}
   if (missing(time)) {stop("time required.")}
@@ -73,23 +75,23 @@ rcs_cox.ushap<-function(data,y,x,time,covs,prob,filepath,...)
     formula <- paste0("S~ rcs(x, ", i, ")") }
     else {formula <- paste0("S~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))
     }
-    fit <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, surv = TRUE)
+    fit <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, tol=1e-25,surv = TRUE)
     summary(fit)
     aics <- c(aics, AIC(fit))
     kn <- seq(3, 7)[which.min(aics)]
   }
-  k <- kn
-
+  if (missing(knot)){
+    knot <- kn
+  }
   if (is.null(covs)) {
-    formula <- paste0("S~ rcs(x, ", k, ")")
+    formula <- paste0("S~ rcs(x, ", knot, ")")
   }
-  else {formula <- paste0("S~ rcs(x, ", k, ")", " + ", paste0(covs, collapse=" + "))
+  else {formula <- paste0("S~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
   }
-
-  model <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, surv = TRUE)
+  model <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, tol=1e-25,surv = TRUE)
   model.cox <- model
-  phassump <- survival::cox.zph(model, "rank")
-  phresidual <- survminer::ggcoxzph(survival::cox.zph(model, "rank"))
+  phassump <- survival::cox.zph(model, transform="km")
+  phresidual <- survminer::ggcoxzph(survival::cox.zph(model,transform="km"))
   anova(model)
   pvalue_all <- anova(model)[1, 3]
   pvalue_nonlin <- round(anova(model)[2, 3],3)

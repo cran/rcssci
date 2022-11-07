@@ -4,6 +4,7 @@
 #'@details linear models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
+#'@param knot knot=3-7 or automatic calculate by AIC min
 #'@param y outcome=0,1
 #'@param covs covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command
 #'@param prob position parameter,range from 0-1
@@ -21,9 +22,9 @@
 #'@examples library(rcssci)
 #' rcs_linear.lshap(data=sbpdata, y = "sbp",x = "age",
 #' prob=0.1,filepath=tempdir())
-#'# library(rcssci
-#'# rcs_linear.lshap(data=sbpdata, y = "sbp",x = "age",
-#'# covs=c("gender"),prob=0.1,filepath=tempdir())
+#'# library(rcssci)
+#'# rcs_linear.lshap(knot=4,data=sbpdata, y = "sbp",x = "age",
+#'# covs=c("gender"),prob=0.1,filepath="D:/temp")
 #'
 #' @export
 #' @name rcs_linear.lshap
@@ -33,9 +34,10 @@ globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'elem
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis',  'survival',
                   'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd'))
 
-rcs_linear.lshap<-function(data,y,x,covs,prob,filepath,...)
+rcs_linear.lshap<-function(data,knot,y,x,covs,prob,filepath,...)
 {
   pacman::p_load(rms,ggplot2,survminer,survival,dplyr,patchwork,Cairo)
+  if (!missing(knot)) {warning("please be sure of knot by AIC min(default) or preliminary investigation suggested")}
   if (missing(data)) {stop("data required.")}
   if (missing(x)) {stop("x required.")}
   if (missing(prob)) {prob <- 0.5} else {assign("prob",prob)}
@@ -66,16 +68,21 @@ rcs_linear.lshap<-function(data,y,x,covs,prob,filepath,...)
   for (i in 3:7) {
     if (is.null(covs)) {formula <- paste0("y~ rcs(x, ", i, ")",paste0(covs, collapse=" + "))
     } else {formula <- paste0("y~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))}
-    fit <- rms::ols(as.formula(formula), data=indf, x=TRUE)
+    fit <- rms::ols(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
     summary(fit)
     aics <- c(aics, AIC(fit))
     kn <- seq(3, 7)[which.min(aics)]
   }
-  k <- kn
-  if (is.null(covs)) {formula <- paste0("y~ rcs(x, ", k, ")",paste0(covs, collapse=" + "))}
-  else {formula <- paste0("y~ rcs(x, ", k, ")", " + ", paste0(covs, collapse=" + "))}
-
-  model <- rms::ols(as.formula(formula), data=indf, x=TRUE)
+  if (missing(knot)){
+    knot <- kn
+  }
+  if (is.null(covs)) {
+    formula <- paste0("y~ rcs(x, ", knot, ")",paste0(covs, collapse=" + "))
+    }
+  else {
+    formula <- paste0("y~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
+    }
+  model <- rms::ols(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
   model.linear <- model
   anova(model)
   pvalue_all <- anova(model)[1, 5]

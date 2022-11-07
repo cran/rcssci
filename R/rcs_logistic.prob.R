@@ -4,6 +4,7 @@
 #'@details logistic models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
+#'@param knot knot=3-7 or automatic calculate by AIC min
 #'@param y outcome=0,1
 #'@param covs covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command
 #'@param prob position parameter,range from 0-1
@@ -21,9 +22,9 @@
 #'@examples library(rcssci)
 #' rcs_logistic.prob(data=sbpdata, y = "status",x = "sbp",
 #' prob=0.1,filepath=tempdir())
-#'# library(rcssci
-#'# rcs_logistic.prob(data=sbpdata, y = "status",x = "sbp",
-#'# covs=c("age","gender"),prob=0.1,filepath=tempdir())
+#'# library(rcssci)
+#'# rcs_logistic.prob(knot=4,data=sbpdata, y = "status",x = "sbp",
+#'# covs=c("age","gender"),prob=0.1,filepath="D:/temp")
 #'
 #' @export
 #' @name rcs_logistic.prob
@@ -34,9 +35,10 @@ globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'elem
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis',  'survival',
                   'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd'))
 
-rcs_logistic.prob<-function(data,y,x,covs,prob,filepath,...)
+rcs_logistic.prob<-function(data,knot,y,x,covs,prob,filepath,...)
 {
   pacman::p_load(rms,ggplot2,survminer,survival,dplyr,patchwork,Cairo)
+  if (!missing(knot)) {warning("please be sure of knot by AIC min(default) or preliminary investigation suggested")}
   if (missing(data)) {stop("data required.")}
   if (missing(x)) {stop("x required.")}
   if (missing(prob)) {prob <- 0.5} else {assign("prob",prob)}
@@ -68,19 +70,21 @@ rcs_logistic.prob<-function(data,y,x,covs,prob,filepath,...)
     } else {formula <- paste0("y~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))
     }
 
-    fit <- rms::lrm(as.formula(formula), data=indf, x=TRUE)
+    fit <- rms::lrm(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
     summary(fit)
     aics <- c(aics, AIC(fit))
     kn <- seq(3, 7)[which.min(aics)]
   }
-  k <- kn
+  if (missing(knot)){
+    knot <- kn
+  }
   if (is.null(covs)) {
-    formula <- paste0("y~ rcs(x, ", k, ")")
+    formula <- paste0("y~ rcs(x, ", knot, ")",paste0(covs, collapse=" + "))
   }
-  else {formula <- paste0("y~ rcs(x, ", k, ")", " + ", paste0(covs, collapse=" + "))
+  else {
+    formula <- paste0("y~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
   }
-
-  model <- rms::lrm(as.formula(formula), data=indf, x=TRUE)
+  model <- rms::lrm(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
   model.logistic <- model
   anova(model)
   pvalue_all <- anova(model)[1, 3]

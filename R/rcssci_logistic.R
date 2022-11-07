@@ -4,6 +4,7 @@
 #'@details logistic models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
+#'@param knot knot=3-7 or automatic calculate by AIC min
 #'@param y outcome=0,1
 #'@param covs covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command
 #'@param prob position parameter,range from 0-1
@@ -22,9 +23,9 @@
 #'\donttest{library(rcssci)
 #' rcssci_logistic(data=sbpdata, y = "status",x = "sbp",
 #' prob=0.1,filepath=tempdir())}
-#'# library(rcssci
-#'# rcssci_logistic(data=sbpdata, y = "status",x = "sbp",
-#'# covs=c("age","gender"),prob=0.1,filepath=tempdir())
+#'# library(rcssci)
+#'# rcssci_logistic(knot=4,data=sbpdata, y = "status",x = "sbp",
+#'# covs=c("age","gender"),prob=0.1,filepath="D:/temp")
 #'
 #' @export
 #' @name rcssci_logistic
@@ -35,12 +36,12 @@ globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'elem
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis', 'segmented', 'survival',
                   'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd'))
 
-rcssci_logistic<-function(data,y,x,covs,prob,filepath,...)
+rcssci_logistic<-function(data,knot,y,x,covs,prob,filepath,...)
 {
-  rcs_logistic.prob(data= data, y = y,x = x,covs=covs,prob=, filepath=filepath)
-  rcs_logistic.ushap(data= data, y = y,x = x,covs=covs,prob=, filepath=filepath)
-  rcs_logistic.nshap(data= data, y = y,x = x,covs=covs,prob=, filepath=filepath)
-  rcs_logistic.lshap(data= data, y = y,x = x,covs=covs,prob=, filepath=filepath)
+  rcs_logistic.prob(data= data, knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
+  rcs_logistic.ushap(data= data,knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
+  rcs_logistic.nshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
+  rcs_logistic.lshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
 }
 
 

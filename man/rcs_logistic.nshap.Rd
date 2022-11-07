@@ -6,6 +6,8 @@
 \arguments{
 \item{data}{data.frame.Rdata}
 
+\item{knot}{knot=3-7 or automatic calculate by AIC min}
+
 \item{y}{outcome=0,1}
 
 \item{covs}{covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command}
@@ -29,9 +31,9 @@ logistic models with RCS splines were performed to explore the shape linear or n
 library(rcssci)
 rcs_logistic.nshap(data=sbpdata, y = "status",x = "sbp",
 prob=0.1,filepath=tempdir())
-# library(rcssci
-# rcs_logistic.nshap(data=sbpdata, y = "status",x = "sbp",
-# covs=c("age","gender"),prob=0.1,filepath=tempdir())
+# library(rcssci)
+# rcs_logistic.nshap(knot=4,data=sbpdata, y = "status",x = "sbp",
+# covs=c("age","gender"),prob=0.1,filepath="D:/temp")
 
 }
 \author{

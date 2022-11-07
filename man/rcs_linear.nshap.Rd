@@ -6,6 +6,8 @@
 \arguments{
 \item{data}{data.frame.Rdata}
 
+\item{knot}{knot=3-7 or automatic calculate by AIC min}
+
 \item{y}{outcome=0,1}
 
 \item{covs}{covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command}
@@ -30,8 +32,8 @@ library(rcssci)
 rcs_linear.nshap(data=sbpdata, y = "sbp",x = "age",
 prob=0.1,filepath=tempdir())
 # library(rcssci
-# rcs_linear.nshap(data=sbpdata, y = "sbp",x = "age",
-# covs=c("gender"),prob=0.1,filepath=tempdir())
+# rcs_linear.nshap(knot=4,data=sbpdata, y = "sbp",x = "age",
+# covs=c("gender"),prob=0.1,filepath="D:/temp")
 
 }
 \author{

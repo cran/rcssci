@@ -1,12 +1,12 @@
 Package: rcssci
 Type: Package
 Title: Visualization of Restricted Cubic Splines
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
        person("Zhiqiang", "Nie",     email = "niezhiqiang@gdph.org.cn", role = c("aut", "cre", "cph"),
-            comment = c("ORCID = 0000-0001-7642-3286")),
+            comment = c("ORCID = 0000-0001-7642-3286", "wechat = Biostatistics-SCI")),
        person("JunZhang",        email = "3219030654@stu.cpu.edu.cn", role = "ctb"), 
-       person("Leichao", "Chen",  email = "15626049801@163.com", role = "ctb")
+       person("Chaolei", "Chen",  email = "15626049801@163.com", role = "ctb")
        )
 Maintainer: Zhiqiang Nie <niezhiqiang@gdph.org.cn>
 Description: Restricted Cubic Splines were performed to explore the shape of association form of "U, inverted U,
@@ -23,9 +23,10 @@ License: Artistic-2.0
 BugReports: https://github.com/popnie/RCSsci/issues
 RoxygenNote: 7.2.1
 NeedsCompilation: no
-Packaged: 2022-10-08 05:01:01 UTC; Administrator
-Author: Zhiqiang Nie [aut, cre, cph] (ORCID = 0000-0001-7642-3286),
+Packaged: 2022-10-14 01:29:36 UTC; niezh
+Author: Zhiqiang Nie [aut, cre, cph] (ORCID = 0000-0001-7642-3286, wechat =
+    Biostatistics-SCI),
   JunZhang [ctb],
-  Leichao Chen [ctb]
+  Chaolei Chen [ctb]
 Repository: CRAN
-Date/Publication: 2022-10-10 08:20:02 UTC
+Date/Publication: 2022-11-07 14:50:02 UTC

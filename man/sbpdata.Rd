@@ -5,7 +5,7 @@
 \alias{sbpdata}
 \title{A data on sbp and status.}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 35 rows and 6 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 3621 rows and 5 columns.
 }
 \usage{
 data(sbpdata)

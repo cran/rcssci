@@ -4,6 +4,7 @@
 #'@details Cox models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
+#'@param knot knot=3-7 or automatic calculate by AIC min
 #'@param y outcome=0,1
 #'@param time censor time
 #'@param covs covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command
@@ -23,9 +24,9 @@
 #'\donttest{library(rcssci)
 #' rcssci_cox(data=sbpdata, y = "status",x = "sbp",time = "time",
 #' prob=0.1,filepath=tempdir())}
-#'# library(rcssci
-#'# rcssci_cox(data=sbpdata, y = "status",x = "sbp",covs=c("age"),
-#'# time = "time", prob=0.1,filepath=tempdir())
+#'# library(rcssci)
+#'# rcssci_cox(knot=4,data=sbpdata, y = "status",x = "sbp",covs=c("age"),
+#'# time = "time", prob=0.1,filepath="D:/temp")
 #'
 #' @export
 #' @name rcssci_cox
@@ -36,12 +37,12 @@ globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'elem
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis', 'segmented', 'survival',
                   'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd','Surv'))
 
-rcssci_cox<-function(data,y,x,time,covs,prob,filepath,...)
+rcssci_cox<-function(data,knot,y,x,time,covs,prob,filepath,...)
 {
-  rcs_cox.prob(data= data, y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
-  rcs_cox.ushap(data= data, y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
-  rcs_cox.nshap(data= data, y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
-  rcs_cox.lshap(data= data, y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
+  rcs_cox.prob(data= data, knot=knot,y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
+  rcs_cox.ushap(data= data,knot=knot,y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
+  rcs_cox.nshap(data= data,knot=knot,y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
+  rcs_cox.lshap(data= data,knot=knot,y = y,x = x,covs=covs,time =time, prob=, filepath=filepath)
 }
 
 
