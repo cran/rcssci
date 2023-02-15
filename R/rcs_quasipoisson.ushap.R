@@ -1,7 +1,7 @@
-#'@title  rcs_logistic.nshap
+#'@title  rcs_quasipoisson.ushap
 #'
 #'@description  restricted cubic splines (RCS) published in SCI.
-#'@details logistic models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
+#'@details quasipoisson models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
 #'@param knot knot=3-7 or automatic calculate by AIC min
@@ -20,22 +20,22 @@
 #'@return message.print PH assumption and other message
 #'@author Zhiqiang Nie, \email{niezhiqiang@@gdph.org.cn}
 #'@examples library(rcssci)
-#' rcs_logistic.nshap(data=sbpdata, y = "status",x = "sbp",
+#' rcs_quasipoisson.ushap(data=sbpdata, y = "status",x = "sbp",
 #' prob=0.1,filepath=tempdir())
 #'# library(rcssci)
-#'# rcs_logistic.nshap(knot=4,data=sbpdata, y = "status",x = "sbp",
+#'# rcs_quasipoisson.ushap(knot=4,data=sbpdata, y = "status",x = "sbp",
 #'# covs=c("age","gender"),prob=0.1,filepath="D:/temp")
 #'
 #' @export
-#' @name rcs_logistic.nshap
+#' @name rcs_quasipoisson.ushap
 #'
 globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'element_line', 'geom_bar',
                   'geom_density', 'geom_hline' ,'geom_line' ,'geom_point', 'geom_ribbon', 'geom_segment',
                   'geom_text', 'geom_vline', 'ggplot2' ,'ggsave', 'lower', 'patchwork', 'pct', 'plot_layout',
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis',  'survival',
-                  'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd'))
+                  'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd','quasipoisson'))
 
-rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
+rcs_quasipoisson.ushap<-function(data,knot,y,x,covs,prob,filepath,...)
 {
   pacman::p_load(rms,ggplot2,survminer,survival,dplyr,patchwork,Cairo)
   if (!missing(knot)) {warning("please be sure of knot by AIC min(default) or preliminary investigation suggested")}
@@ -69,7 +69,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   for (i in 3:7) {if (is.null(covs)) {formula <- paste0("y~ rcs(x, ", i, ")")
     } else {formula <- paste0("y~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))
     }
-
+    #Glm couldn't provide AIC
     fit <- rms::lrm(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
     summary(fit)
     aics <- c(aics, AIC(fit))
@@ -84,30 +84,29 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   else {
     formula <- paste0("y~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
   }
-  model <- rms::lrm(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
-  model.logistic <- model
+  model <- rms::Glm(as.formula(formula), data=indf, x=TRUE,family = quasipoisson)
+  model.quasipoisson <- model
   anova(model)
   pvalue_all <- anova(model)[1, 3]
   pvalue_nonlin <- round(anova(model)[2, 3],3)
-  pre.model <-rms::Predict(model.logistic,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
+  pre.model <-rms::Predict(model.quasipoisson,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
+
 
   Q20 <- quantile(indf$x,probs = seq(0,1,0.05))
-  nshap <- data.frame(pre.model)
-  nshapmax <- subset(nshap, yhat==max(pre.model[, "yhat"]) )
-  nshap.cutoff <- nshapmax$x
+  ushap <- data.frame(pre.model)
+  ushapmin <- subset(ushap, yhat==min(pre.model[, "yhat"]) )
+  ushap.cutoff <- ushapmin$x
   dd <<- rms::datadist(indf)
-  dd[["limits"]]["Adjust to", "x"] <<- nshap.cutoff
+  dd[["limits"]]["Adjust to", "x"] <<- ushap.cutoff
   old <- options()
   on.exit(options(old))
   options(datadist = "dd")
   model <- update(model)
-  model.logistic <- model
-  pre.model <-rms::Predict(model.logistic,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
+  model.quasipoisson <- model
+  pre.model <-rms::Predict(model.quasipoisson,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
 
-  nshapci <- data.frame(pre.model)
-  nshapcimax <- subset(nshapci, yhat==1 )
-
-  ## prob ggplot
+  ushapci <- data.frame(pre.model)
+  ushapcimin <- subset(ushapci, yhat==1 )
   newdf1 <- as.data.frame(dplyr::select(pre.model,x,yhat,lower,upper))
   colnames(newdf1) <- c("x", "y", "lower", "upper")
   min(newdf1[, "x"])
@@ -127,7 +126,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   as.data.frame(table(freq))
   scale_factor <- ymax2 / ymax1
   xtitle <- x
-  ytitle1 <- paste0("OR where the nshap.cutoff for ", x, " is ", sprintf("%.3f", nshap.cutoff))
+  ytitle1 <- paste0("RR where the ushap.cutoff for ", x, " is ", sprintf("%.3f", ushap.cutoff))
   ytitle2 <- "Percentage of Population (%)"
   offsetx1 <- (xmax - xmin) * 0.02
   offsety1 <- ymax1 * 0.02
@@ -143,8 +142,8 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
     ifelse(pvalue_nonlin < 0.001, "< 0.001", sprintf("%.3f", pvalue_nonlin))
   )
 
-  ## histogram plot by parameter "nshap.cutoff"
-  plot.nshap.type1 <- ggplot2::ggplot() +
+  ## histogram plot by parameter "ushap.cutoff"
+  plot.ushap.type1 <- ggplot2::ggplot() +
     geom_bar(
       data=newdf3, aes(x=x, y=pct*100/scale_factor),
       stat="identity", width=(xmax-xmin)/(length(breaks)-1),
@@ -154,7 +153,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
     geom_line(data=newdf1, aes(x=x, y=lower), linetype=2, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=upper), linetype=2, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=y), color="#e23e57",size=1) +
-    geom_point(aes(x=nshap.cutoff, y=1), color="#e23e57", size=2) +
+    geom_point(aes(x=ushap.cutoff, y=1), color="#e23e57", size=2) +
     geom_segment(
       aes(
         x=c(labelx1-offsetx1*5, labelx1-offsetx1*5),
@@ -179,9 +178,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
       panel.grid=element_blank(),
       panel.border=element_blank()
     )
-
-  ## histogram plot by parameter "nshap.cutoff" with CI shadow
-  plot.nshap.type2 <- ggplot2::ggplot() +
+  plot.ushap.type2 <- ggplot2::ggplot() +
     geom_bar(
       data=newdf3, aes(x=x, y=pct*100/scale_factor),
       stat="identity", width=(xmax-xmin)/(length(breaks)-1),
@@ -194,7 +191,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
     geom_line(data=newdf1, aes(x=x, y=lower), linetype=0, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=upper), linetype=0, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=y), color="#e23e57",size=1) +
-    geom_point(aes(x=nshap.cutoff, y=1), color="#e23e57", size=2) +
+    geom_point(aes(x=ushap.cutoff, y=1), color="#e23e57", size=2) +
     geom_segment(
       aes(
         x=c(labelx1-offsetx1*5, labelx1-offsetx1*5),
@@ -220,17 +217,17 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
       panel.border=element_blank()
     )
 
-  ## simple rcs plot by parameter "nshap.cutoff"
-  plot.nshap.type3 <- ggplot2::ggplot() +
+  ## simple rcs plot by parameter "ushap.cutoff"
+  plot.ushap.type3 <- ggplot2::ggplot() +
     geom_hline(yintercept=1, size=1,linetype=2, color="grey") +
-    geom_vline(xintercept=nshap.cutoff,size=1,linetype=1,color = '#d40e8c',alpha=0.3)+
+    geom_vline(xintercept=ushap.cutoff,size=1,linetype=1,color = '#d40e8c',alpha=0.3)+
     geom_ribbon(
       data=newdf1, aes(x=x, ymin=lower, ymax=upper),
       fill="#e23e57", alpha=0.1) +
     geom_line(data=newdf1, aes(x=x, y=lower), linetype=0, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=upper), linetype=0, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=y), color="#e23e57",size=1) +
-    geom_point(aes(x=nshap.cutoff, y=1), color="#e23e57", size=2) +
+    geom_point(aes(x=ushap.cutoff, y=1), color="#e23e57", size=2) +
     geom_segment(
       aes(
         x=c(labelx1-offsetx1*5, labelx1-offsetx1*5),
@@ -254,11 +251,11 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
     )
 
 
-  ## Density plot by parameter "nshap.cutoff"
+  ## Density plot by parameter "ushap.cutoff"
   ytitle2 <- "Density"
   ymax2 <- 0.1
   scale_factor2 <- 0.1 / ymax1
-  plot.nshap.type4 <- ggplot2::ggplot()+
+  plot.ushap.type4 <- ggplot2::ggplot()+
     geom_density(data = newdf2,
                  mapping =aes(x = x, y = ..density.. /scale_factor2),
                  fill="#f9f7f7", color="grey",
@@ -270,7 +267,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
     geom_line(data=newdf1, aes(x=x, y=lower), linetype=0, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=upper), linetype=0, color="#ff9999",size=0.8) +
     geom_line(data=newdf1, aes(x=x, y=y), color="#e23e57",size=1) +
-    geom_point(aes(x=nshap.cutoff, y=1), color="#e23e57", size=2) +
+    geom_point(aes(x=ushap.cutoff, y=1), color="#e23e57", size=2) +
     geom_segment(
       aes(
         x=c(labelx1-offsetx1*5, labelx1-offsetx1*5),
@@ -295,16 +292,13 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
       panel.grid=element_blank(),
       panel.border=element_blank()
     )
-
-
-
-  fig.nshapall <- plot.nshap.type1+plot.nshap.type2+plot.nshap.type3+plot.nshap.type4+plot_layout(nrow = 2, byrow = TRUE)
+  fig.ushapall <- plot.ushap.type1+plot.ushap.type2+plot.ushap.type3+plot.ushap.type4+plot_layout(nrow = 2, byrow = TRUE)
 
   dev.new()
-  ggsave("fig.logistic_nshapall.PDF", fig.nshapall, width = 14, height =10  , device = cairo_pdf, family = "Times",path=filepath)
+  ggsave("fig.quasipoisson_ushapall.PDF", fig.ushapall, width = 14, height =10  , device = cairo_pdf, family = "Times",path=filepath)
   dev.off()
 
-  message.print <- list(aics=aics,kn=kn,Q20=Q20,nshapcimax=nshapcimax)
+  message.print <- list(aics=aics,kn=kn,Q20=Q20,ushapcimin=ushapcimin)
   return(message.print)
 }
 

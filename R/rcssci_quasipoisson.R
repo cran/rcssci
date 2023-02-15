@@ -1,12 +1,11 @@
-#'@title  rcssci_cox
+#'@title  rcssci_quasipoisson
 #'
 #'@description  restricted cubic splines (RCS) published in SCI.
-#'@details Cox models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
+#'@details quasipoisson models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
 #'@param knot knot=3-7 or automatic calculate by AIC min
 #'@param y outcome=0,1
-#'@param time censor time
 #'@param covs covariables, univariate analysis  without "covs" command, multivariable analysis  with "covs" command
 #'@param prob position parameter,range from 0-1
 #'@param x  main exposure and X-axis when plotting
@@ -22,28 +21,28 @@
 #'@author Zhiqiang Nie, \email{niezhiqiang@@gdph.org.cn}
 #'@examples
 #'\donttest{library(rcssci)
-#' rcssci_cox(data=sbpdata, y = "status",x = "sbp",time = "time",
+#' rcssci_quasipoisson(data=sbpdata, y = "status",x = "sbp",
 #' prob=0.1,filepath=tempdir())}
 #'# library(rcssci)
-#'# rcssci_cox(knot=4,data=sbpdata, y = "status",x = "sbp",covs=c("age"),
-#'# time = "time", prob=0.1,filepath="D:/temp")
+#'# rcssci_quasipoisson(knot=4,data=sbpdata, y = "status",x = "sbp",
+#'# covs=c("age","gender"),prob=0.1,filepath="D:/temp")
 #'
 #' @export
-#' @name rcssci_cox
+#' @name rcssci_quasipoisson
 #'
 globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'element_line', 'geom_bar',
                   'geom_density', 'geom_hline' ,'geom_line' ,'geom_point', 'geom_ribbon', 'geom_segment',
                   'geom_text', 'geom_vline', 'ggplot2' ,'ggsave', 'lower', 'patchwork', 'pct', 'plot_layout',
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis', 'segmented', 'survival',
-                  'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd','Surv'))
+                  'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd','quasipoisson'))
 
-rcssci_cox<-function(data,knot,y,x,time,covs,prob,filepath,...)
+rcssci_quasipoisson<-function(data,knot,y,x,covs,prob,filepath,...)
 {
   if (!missing(knot)) {warning("please be sure of knot by AIC min(default) or preliminary investigation suggested")}
-  rcs_cox.prob(data= data, knot=knot,y = y,x = x,covs=covs,time =time, prob=prob, filepath=filepath)
-  rcs_cox.ushap(data= data,knot=knot,y = y,x = x,covs=covs,time =time, prob=prob, filepath=filepath)
-  rcs_cox.nshap(data= data,knot=knot,y = y,x = x,covs=covs,time =time, prob=prob, filepath=filepath)
-  rcs_cox.lshap(data= data,knot=knot,y = y,x = x,covs=covs,time =time, prob=prob, filepath=filepath)
+  rcs_quasipoisson.prob(data= data, knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
+  rcs_quasipoisson.ushap(data= data,knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
+  rcs_quasipoisson.nshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
+  rcs_quasipoisson.lshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
 }
 
 

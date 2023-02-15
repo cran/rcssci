@@ -37,10 +37,11 @@ globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'elem
 
 rcssci_linear<-function(data,knot,y,x,covs,prob,filepath,...)
 {
-  rcs_linear.prob(data= data, knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
-  rcs_linear.ushap(data= data,knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
-  rcs_linear.nshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
-  rcs_linear.lshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=, filepath=filepath)
+  if (!missing(knot)) {warning("please be sure of knot by AIC min(default) or preliminary investigation suggested")}
+  rcs_linear.prob(data= data, knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
+  rcs_linear.ushap(data= data,knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
+  rcs_linear.nshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
+  rcs_linear.lshap(data= data,knot=knot,y = y,x = x,covs=covs,prob=prob, filepath=filepath)
 }
 
 

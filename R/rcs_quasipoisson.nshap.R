@@ -1,7 +1,7 @@
-#'@title  rcs_logistic.nshap
+#'@title  rcs_quasipoisson.nshap
 #'
 #'@description  restricted cubic splines (RCS) published in SCI.
-#'@details logistic models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
+#'@details quasipoisson models with RCS splines were performed to explore the shape linear or nonlinear(U, inverted U,J,S,L,log,-log,temporary plateau shape)
 #'
 #'@param data data.frame.Rdata
 #'@param knot knot=3-7 or automatic calculate by AIC min
@@ -20,22 +20,22 @@
 #'@return message.print PH assumption and other message
 #'@author Zhiqiang Nie, \email{niezhiqiang@@gdph.org.cn}
 #'@examples library(rcssci)
-#' rcs_logistic.nshap(data=sbpdata, y = "status",x = "sbp",
+#' rcs_quasipoisson.nshap(data=sbpdata, y = "status",x = "sbp",
 #' prob=0.1,filepath=tempdir())
 #'# library(rcssci)
-#'# rcs_logistic.nshap(knot=4,data=sbpdata, y = "status",x = "sbp",
+#'# rcs_quasipoisson.nshap(knot=4,data=sbpdata, y = "status",x = "sbp",
 #'# covs=c("age","gender"),prob=0.1,filepath="D:/temp")
 #'
 #' @export
-#' @name rcs_logistic.nshap
+#' @name rcs_quasipoisson.nshap
 #'
 globalVariables(c('..density..', 'Cairo' ,'aes', 'dplyr' ,'element_blank', 'element_line', 'geom_bar',
                   'geom_density', 'geom_hline' ,'geom_line' ,'geom_point', 'geom_ribbon', 'geom_segment',
                   'geom_text', 'geom_vline', 'ggplot2' ,'ggsave', 'lower', 'patchwork', 'pct', 'plot_layout',
                   'rms', 'scale_x_continuous', 'scale_y_continuous' ,'sec_axis',  'survival',
-                  'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd'))
+                  'survminer', 'theme', 'theme_bw', 'upper' ,'yhat','datadist','dd','quasipoisson'))
 
-rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
+rcs_quasipoisson.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
 {
   pacman::p_load(rms,ggplot2,survminer,survival,dplyr,patchwork,Cairo)
   if (!missing(knot)) {warning("please be sure of knot by AIC min(default) or preliminary investigation suggested")}
@@ -69,7 +69,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   for (i in 3:7) {if (is.null(covs)) {formula <- paste0("y~ rcs(x, ", i, ")")
     } else {formula <- paste0("y~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))
     }
-
+    #Glm couldn't provide AIC
     fit <- rms::lrm(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
     summary(fit)
     aics <- c(aics, AIC(fit))
@@ -84,12 +84,12 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   else {
     formula <- paste0("y~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
   }
-  model <- rms::lrm(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
-  model.logistic <- model
+  model <- rms::Glm(as.formula(formula), data=indf, x=TRUE,family = quasipoisson)
+  model.quasipoisson <- model
   anova(model)
   pvalue_all <- anova(model)[1, 3]
   pvalue_nonlin <- round(anova(model)[2, 3],3)
-  pre.model <-rms::Predict(model.logistic,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
+  pre.model <-rms::Predict(model.quasipoisson,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
 
   Q20 <- quantile(indf$x,probs = seq(0,1,0.05))
   nshap <- data.frame(pre.model)
@@ -101,8 +101,8 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   on.exit(options(old))
   options(datadist = "dd")
   model <- update(model)
-  model.logistic <- model
-  pre.model <-rms::Predict(model.logistic,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
+  model.quasipoisson <- model
+  pre.model <-rms::Predict(model.quasipoisson,x,fun=exp,type="predictions",ref.zero=T,conf.int = 0.95,digits=2)
 
   nshapci <- data.frame(pre.model)
   nshapcimax <- subset(nshapci, yhat==1 )
@@ -127,7 +127,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   as.data.frame(table(freq))
   scale_factor <- ymax2 / ymax1
   xtitle <- x
-  ytitle1 <- paste0("OR where the nshap.cutoff for ", x, " is ", sprintf("%.3f", nshap.cutoff))
+  ytitle1 <- paste0("RR where the nshap.cutoff for ", x, " is ", sprintf("%.3f", nshap.cutoff))
   ytitle2 <- "Percentage of Population (%)"
   offsetx1 <- (xmax - xmin) * 0.02
   offsety1 <- ymax1 * 0.02
@@ -301,7 +301,7 @@ rcs_logistic.nshap<-function(data,knot,y,x,covs,prob,filepath,...)
   fig.nshapall <- plot.nshap.type1+plot.nshap.type2+plot.nshap.type3+plot.nshap.type4+plot_layout(nrow = 2, byrow = TRUE)
 
   dev.new()
-  ggsave("fig.logistic_nshapall.PDF", fig.nshapall, width = 14, height =10  , device = cairo_pdf, family = "Times",path=filepath)
+  ggsave("fig.quasipoisson_nshapall.PDF", fig.nshapall, width = 14, height =10  , device = cairo_pdf, family = "Times",path=filepath)
   dev.off()
 
   message.print <- list(aics=aics,kn=kn,Q20=Q20,nshapcimax=nshapcimax)

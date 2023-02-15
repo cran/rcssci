@@ -75,7 +75,7 @@ rcs_cox.prob<-function(data,knot,y,x,time,covs,prob,filepath,...)
     formula <- paste0("S~ rcs(x, ", i, ")") }
     else {formula <- paste0("S~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))
     }
-    fit <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, tol=1e-25,surv = TRUE)
+    fit <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, se.fit=TRUE,tol=1e-25,surv = TRUE)
     summary(fit)
     aics <- c(aics, AIC(fit))
     kn <- seq(3, 7)[which.min(aics)]
@@ -88,7 +88,7 @@ rcs_cox.prob<-function(data,knot,y,x,time,covs,prob,filepath,...)
   }
   else {formula <- paste0("S~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
   }
-  model <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, tol=1e-25,surv = TRUE)
+  model <- rms::cph(as.formula(formula), data=indf, x= TRUE, y= TRUE, se.fit=TRUE,tol=1e-25,surv = TRUE)
   model.cox <- model
   phassump <- survival::cox.zph(model, transform="km")
   phresidual <- survminer::ggcoxzph(survival::cox.zph(model, transform="km"))

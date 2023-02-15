@@ -70,7 +70,7 @@ rcs_logistic.lshap<-function(data,knot,y,x,covs,prob,filepath,...)
     } else {formula <- paste0("y~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))
     }
 
-    fit <- rms::lrm(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
+    fit <- rms::lrm(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
     summary(fit)
     aics <- c(aics, AIC(fit))
     kn <- seq(3, 7)[which.min(aics)]
@@ -84,7 +84,7 @@ rcs_logistic.lshap<-function(data,knot,y,x,covs,prob,filepath,...)
   else {
     formula <- paste0("y~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
   }
-  model <- rms::lrm(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
+  model <- rms::lrm(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
   model.logistic <- model
   anova(model)
   pvalue_all <- anova(model)[1, 3]

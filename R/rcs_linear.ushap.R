@@ -68,7 +68,7 @@ rcs_linear.ushap<-function(data,knot,y,x,covs,prob,filepath,...)
   for (i in 3:7) {
     if (is.null(covs)) {formula <- paste0("y~ rcs(x, ", i, ")",paste0(covs, collapse=" + "))
     } else {formula <- paste0("y~ rcs(x, ", i, ")", " + ", paste0(covs, collapse=" + "))}
-    fit <- rms::ols(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
+    fit <- rms::ols(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
     summary(fit)
     aics <- c(aics, AIC(fit))
     kn <- seq(3, 7)[which.min(aics)]
@@ -82,7 +82,7 @@ rcs_linear.ushap<-function(data,knot,y,x,covs,prob,filepath,...)
   else {
     formula <- paste0("y~ rcs(x, ", knot, ")", " + ", paste0(covs, collapse=" + "))
   }
-  model <- rms::ols(as.formula(formula), data=indf, x=TRUE,tol=1e-25)
+  model <- rms::ols(as.formula(formula), data=indf, x=TRUE,se.fit=TRUE,tol=1e-25)
   model.linear <- model
   anova(model)
   pvalue_all <- anova(model)[1, 5]

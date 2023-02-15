@@ -1,7 +1,7 @@
 Package: rcssci
 Type: Package
 Title: Visualization of Restricted Cubic Splines
-Version: 0.2.0
+Version: 0.4.0
 Authors@R: c(
        person("Zhiqiang", "Nie",     email = "niezhiqiang@gdph.org.cn", role = c("aut", "cre", "cph"),
             comment = c("ORCID = 0000-0001-7642-3286", "wechat = Biostatistics-SCI")),
@@ -10,7 +10,8 @@ Authors@R: c(
        )
 Maintainer: Zhiqiang Nie <niezhiqiang@gdph.org.cn>
 Description: Restricted Cubic Splines were performed to explore the shape of association form of "U, inverted U,
-    L" shape and test linearity or non-linearity base on "Cox,Logistic,linear" regression, and auto output Restricted Cubic Splines figures.
+    L" shape and test linearity or non-linearity base on "Cox,Logistic,linear,quasipoisson" regression, and auto output Restricted Cubic Splines figures.
+    rcssci package could automatically draw RCS graphics with Y-axis "OR,HR,RR,beta".
     The Restricted Cubic Splines method were based on 
     Suli Huang (2022) <doi:10.1016/j.ecoenv.2022.113183>,Amit Kaura (2019) <doi:10.1136/bmj.l6055>,
     and Harrell Jr (2015, ISBN:978-3-319-19424-0 (Print) 978-3-319-19425-7 (Online)).
@@ -23,10 +24,10 @@ License: Artistic-2.0
 BugReports: https://github.com/popnie/RCSsci/issues
 RoxygenNote: 7.2.1
 NeedsCompilation: no
-Packaged: 2022-10-14 01:29:36 UTC; niezh
+Packaged: 2023-02-15 05:09:57 UTC; niezh
 Author: Zhiqiang Nie [aut, cre, cph] (ORCID = 0000-0001-7642-3286, wechat =
     Biostatistics-SCI),
   JunZhang [ctb],
   Chaolei Chen [ctb]
 Repository: CRAN
-Date/Publication: 2022-11-07 14:50:02 UTC
+Date/Publication: 2023-02-15 21:20:02 UTC
